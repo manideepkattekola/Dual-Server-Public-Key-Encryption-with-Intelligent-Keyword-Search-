@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero-panel">
+    <h1 class="h2 mb-2">Dual-Server Public-Key Encryption with Keyword Search</h1>
+    <p>
+        End-to-end secure cloud storage demo where files are encrypted with AES, keywords are transformed using DS-PEKS,
+        and search runs through Front Server + Back Server simulation without exposing plaintext keywords.
+    </p>
+</section>
+
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Data Owner Experience</h5>
+                <p class="text-muted mb-3">Upload files, inspect secure processing traces, and manage encrypted cloud documents.</p>
+                <ul class="suggestion-list mb-3">
+                    <li>Extracts top keywords from TXT, PDF, DOCX</li>
+                    <li>Encrypts file with AES-256 and wraps AES key</li>
+                    <li>Stores DS-PEKS ciphertext tuples only for search index</li>
+                </ul>
+                <a href="/login" class="btn btn-primary">Start as Data Owner</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Data User Experience</h5>
+                <p class="text-muted mb-3">Perform private keyword search and download decrypted results through secure flow screens.</p>
+                <ul class="suggestion-list mb-3">
+                    <li>Creates trapdoor token from search keyword</li>
+                    <li>Front Server computes CITS candidates</li>
+                    <li>Back Server validates matches and returns results</li>
+                </ul>
+                <a href="/login" class="btn btn-success">Start as Data User</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">
+        <h5 class="mb-0">Why This Project Matters</h5>
+    </div>
+    <div class="card-body">
+        <div class="feature-grid">
+            <div class="feature-item">
+                <div class="title">Content Privacy</div>
+                Files are encrypted before cloud upload.
+            </div>
+            <div class="feature-item">
+                <div class="title">Search Privacy</div>
+                Keywords are never stored as plaintext in the searchable index.
+            </div>
+            <div class="feature-item">
+                <div class="title">Dual-Server Protection</div>
+                Trapdoor-based FS and BS checks reduce inside keyword guessing risk.
+            </div>
+        </div>
+        <div class="helper-strip mt-3 mb-0">
+            <div class="title">Suggestion</div>
+            Use sample files with repeated domain terms like finance, audit, policy to clearly observe DS-PEKS search behavior in the trace view.
+        </div>
+    </div>
+ </div>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero-panel">
+    <h2 class="h4 mb-2">Search Outcome</h2>
+    <p>Review DS-PEKS execution trace, matched documents, and proceed with secure download flow when needed.</p>
+</section>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>Search Results for: "{{ keyword }}"</h4>
+            </div>
+            <div class="card-body">
+                <div class="helper-strip">
+                    <div class="title">Suggestion</div>
+                    If no results are found, try variations of your keyword: singular/plural forms, abbreviations, or common terms from the document domain.
+                </div>
+                {% if search_trace %}
+                <div class="alert alert-secondary">
+                    <strong>Search Execution Trace</strong>
+                    <ol class="trace-list mt-2">
+                        {% for step in search_trace %}
+                        <li class="trace-list-item">
+                            <div class="trace-title">{{ step.phase }}</div>
+                            <div class="trace-detail">{{ step.detail }}</div>
+                            {% if step.payload %}
+                            <pre class="trace-payload">{{ step.payload | tojson(indent=2) }}</pre>
+                            {% endif %}
+                            {% if step.elapsed_ms is defined %}
+                            <span class="badge bg-light text-dark">{{ step.elapsed_ms }} ms</span>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ol>
+                </div>
+                {% endif %}
+
+                {% if documents %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Filename</th>
+                                <th>Owner</th>
+                                <th>Upload Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for doc in documents %}
+                            <tr>
+                                <td>{{ doc.original_filename }}</td>
+                                <td>{{ doc.owner.username }}</td>
+                                <td>{{ doc.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>
+                                    <a href="/user/download/{{ doc.id }}" class="btn btn-sm btn-success">Download</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-warning">
+                    No files found containing the keyword "{{ keyword }}".
+                    Try a broader term or check whether owner documents include this topic.
+                </div>
+                {% endif %}
+                
+                <a href="/user/dashboard" class="btn btn-secondary">New Search</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

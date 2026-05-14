@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero-panel">
+    <h2 class="h4 mb-2">Data Owner Control Center</h2>
+    <p>Upload documents securely, view encryption pipeline traces, and manage encrypted cloud files with confidence.</p>
+</section>
+
+<div class="helper-strip">
+    <div class="title">Feature Guidance</div>
+    Upload supports TXT, PDF, and DOCX. The system extracts top keywords, encrypts file content via AES, encrypts keyword index via DS-PEKS, and stores encrypted payload in cloud.
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>Upload New File</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-secondary">
+                    Cloud backend:
+                    {% if dropbox_enabled %}
+                        <strong>Dropbox API</strong>
+                    {% else %}
+                        <strong>Local fallback</strong> (set <code>DROPBOX_ACCESS_TOKEN</code> to enable Dropbox)
+                    {% endif %}
+                    <div class="mt-1 text-muted small">Status: {{ cloud_status }}</div>
+                </div>
+                <div class="alert alert-info">
+                    <strong>Suggestion:</strong> Upload files with domain-specific repeated terms so the extracted top-5 keywords are meaningful for search demonstration.
+                </div>
+
+                <form
+                    method="POST"
+                    action="/owner/upload"
+                    enctype="multipart/form-data"
+                    class="trace-form"
+                    data-trace-title="Secure Upload Pipeline"
+                    data-enable-upload-progress="true"
+                    data-trace-steps='["Capture request and validate file type", "Extract document text (PDF/TXT/DOCX)", "Build top-5 keyword set with stopword filtering", "Generate AES key and IV", "Encrypt file with AES-CBC", "Wrap AES key and encrypt owner keyword metadata", "Encrypt keyword set using DS-PEKS tuples", "Upload encrypted file to cloud", "Persist metadata and ciphertext rows in SQLite"]'
+                >
+                    <div class="mb-3">
+                        <label for="file" class="form-label">Choose File (PDF, DOCX, DOC, TXT)</label>
+                        <input type="file" class="form-control" id="file" name="file" accept=".pdf,.docx,.doc,.txt" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Upload & Encrypt</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>Download Analytics</h4>
+            </div>
+            <div class="card-body">
+                <div class="helper-strip">
+                    <div class="title">Detailed Access Report</div>
+                    Track total files, total downloads, who accessed each file, and exact access date/time.
+                </div>
+
+                <form method="GET" action="/owner/dashboard" class="row g-2 align-items-end mb-3">
+                    <div class="col-lg-2 col-md-6">
+                        <label for="start_date" class="form-label">Start Date</label>
+                        <input type="date" id="start_date" name="start_date" class="form-control" value="{{ filters.start_date }}">
+                    </div>
+                    <div class="col-lg-2 col-md-6">
+                        <label for="end_date" class="form-label">End Date</label>
+                        <input type="date" id="end_date" name="end_date" class="form-control" value="{{ filters.end_date }}">
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <label for="accessor" class="form-label">Accessor</label>
+                        <select id="accessor" name="accessor" class="form-select">
+                            <option value="">All Accessors</option>
+                            {% for accessor in accessor_options %}
+                            <option value="{{ accessor }}" {% if filters.accessor == accessor %}selected{% endif %}>{{ accessor }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <label for="file_name" class="form-label">File</label>
+                        <select id="file_name" name="file_name" class="form-select">
+                            <option value="">All Files</option>
+                            {% for item in file_options %}
+                            <option value="{{ item }}" {% if filters.file_name == item %}selected{% endif %}>{{ item }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-lg-2 col-md-12 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary w-100">Apply</button>
+                        <a href="/owner/dashboard" class="btn btn-secondary">Reset</a>
+                    </div>
+                </form>
+
+                <div class="mb-3">
+                    <a
+                        class="btn btn-outline-primary"
+                        href="/owner/analytics/export?start_date={{ filters.start_date }}&end_date={{ filters.end_date }}&accessor={{ filters.accessor }}&file_name={{ filters.file_name }}"
+                    >
+                        Export CSV Report
+                    </a>
+                </div>
+
+                <div class="feature-grid mb-3">
+                    <div class="feature-item">
+                        <div class="title">Total Files</div>
+                        <strong>{{ stats.total_files }}</strong>
+                    </div>
+                    <div class="feature-item">
+                        <div class="title">Total Downloads</div>
+                        <strong>{{ stats.total_downloads }}</strong>
+                    </div>
+                    <div class="feature-item">
+                        <div class="title">Unique Accessors</div>
+                        <strong>{{ stats.unique_accessors }}</strong>
+                    </div>
+                    <div class="feature-item">
+                        <div class="title">Owner Downloads</div>
+                        <strong>{{ stats.owner_downloads }}</strong>
+                    </div>
+                    <div class="feature-item">
+                        <div class="title">User Downloads</div>
+                        <strong>{{ stats.user_downloads }}</strong>
+                    </div>
+                    <div class="feature-item">
+                        <div class="title">Most Downloaded File</div>
+                        {% if stats.top_files %}
+                            <strong>{{ stats.top_files[0][0] }}</strong>
+                            <div class="text-muted">{{ stats.top_files[0][1] }} downloads</div>
+                        {% else %}
+                            <strong>N/A</strong>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-2">
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="card-header"><h5 class="mb-0">Top Downloaded Files</h5></div>
+                            <div class="card-body">
+                                {% if stats.top_files %}
+                                <ul class="suggestion-list">
+                                    {% for file_name, count in stats.top_files %}
+                                    <li>{{ file_name }} - {{ count }} downloads</li>
+                                    {% endfor %}
+                                </ul>
+                                {% else %}
+                                <p class="text-muted mb-0">No downloads recorded yet.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="card-header"><h5 class="mb-0">Top Accessors</h5></div>
+                            <div class="card-body">
+                                {% if stats.top_accessors %}
+                                <ul class="suggestion-list">
+                                    {% for username, count in stats.top_accessors %}
+                                    <li>{{ username }} - {{ count }} downloads</li>
+                                    {% endfor %}
+                                </ul>
+                                {% else %}
+                                <p class="text-muted mb-0">No accessors recorded yet.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>File</th>
+                                <th>Accessed By</th>
+                                <th>Role</th>
+                                <th>Date & Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if download_rows %}
+                                {% for row in download_rows %}
+                                <tr>
+                                    <td>{{ row.doc_name }}</td>
+                                    <td>{{ row.accessor_name }} ({{ row.accessor_username }})</td>
+                                    <td><span class="badge bg-primary">{{ row.accessor_role }}</span></td>
+                                    <td>{{ row.accessed_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-muted">No download activity recorded yet.</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {% if upload_trace %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>Latest Upload Trace</h4>
+            </div>
+            <div class="card-body">
+                <ol class="trace-list">
+                    {% for step in upload_trace %}
+                    <li class="trace-list-item">
+                        <div class="trace-title">{{ step.phase }}</div>
+                        <div class="trace-detail">{{ step.detail }}</div>
+                        {% if step.payload %}
+                        <pre class="trace-payload">{{ step.payload | tojson(indent=2) }}</pre>
+                        {% endif %}
+                        {% if step.elapsed_ms is defined %}
+                        <span class="badge bg-light text-dark">{{ step.elapsed_ms }} ms</span>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ol>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header">
+                <h4>My Documents</h4>
+            </div>
+            <div class="card-body">
+                <div class="helper-strip">
+                    <div class="title">How to Read This Table</div>
+                    "keywords encrypted" means DS-PEKS ciphertext tuples are stored for secure searching. Displayed keyword tags are owner-only metadata labels.
+                </div>
+                {% if documents %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Filename</th>
+                                <th>Upload Date</th>
+                                <th>Keywords (Encrypted)</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for doc in documents %}
+                            <tr>
+                                <td>{{ doc.original_filename }}</td>
+                                <td>{{ doc.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>
+                                    <span class="badge bg-secondary">
+                                        {{ doc.keyword_ciphertexts|length }} keywords encrypted
+                                    </span>
+                                    {% if doc.display_keywords %}
+                                    <div class="mt-2">
+                                        {% for kw in doc.display_keywords %}
+                                            <span class="badge bg-info text-dark me-1">{{ kw }}</span>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="/owner/download/{{ doc.id }}" class="btn btn-sm btn-success">Download</a>
+                                    <a href="/owner/delete/{{ doc.id }}" class="btn btn-sm btn-danger" onclick="return confirm('Delete this file?')">Delete</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">No files uploaded yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

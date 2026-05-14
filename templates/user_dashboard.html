@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero-panel">
+    <h2 class="h4 mb-2">Private Search Workspace</h2>
+    <p>Search encrypted indexes with trapdoor-based DS-PEKS flow. Front Server and Back Server simulation runs invisibly while preserving keyword privacy.</p>
+</section>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4>Search Encrypted Files</h4>
+            </div>
+            <div class="card-body">
+                <div class="helper-strip">
+                    <div class="title">Search Suggestion</div>
+                    Try keywords that likely appear in uploaded documents, such as finance, report, audit, compliance, policy.
+                </div>
+                <form
+                    method="POST"
+                    action="/user/search"
+                    class="trace-form"
+                    data-trace-title="DS-PEKS Search Pipeline"
+                    data-trace-steps='["Capture user keyword", "Generate trapdoor token pair", "Load encrypted ciphertext index", "Front Server computes CITS candidates", "Back Server verifies match decisions", "Collect matched document identifiers", "Return secure results without exposing plaintext keyword"]'
+                >
+                    <div class="mb-3">
+                        <label for="keyword" class="form-label">Enter Keyword to Search</label>
+                        <input type="text" class="form-control" id="keyword" name="keyword" 
+                               placeholder="e.g., finance, report, confidential" required>
+                        <small class="text-muted">Your keyword will be encrypted using DS-PEKS before searching</small>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </form>
+                
+                <hr>
+                
+                <div class="alert alert-info mt-3">
+                    <strong>How it works:</strong>
+                    <ol class="mb-0">
+                        <li>You enter a keyword</li>
+                        <li>System generates a secure trapdoor</li>
+                        <li>Front and Back servers collaborate to search</li>
+                        <li>Your keyword remains private throughout</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

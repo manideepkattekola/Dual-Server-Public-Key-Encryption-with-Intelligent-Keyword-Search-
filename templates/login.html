@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero-panel mb-3">
+    <h2 class="h4 mb-2">Welcome Back</h2>
+    <p>Sign in to continue secure upload, private search, and trace-driven demonstration of the DS-PEKS workflow.</p>
+</section>
+
+<div class="row g-3 justify-content-center">
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Need Help Choosing Role?</h5>
+                <ul class="suggestion-list">
+                    <li>Data Owner: upload, encrypt, and manage files</li>
+                    <li>Data User: search with trapdoor and download matches</li>
+                    <li>Both roles can inspect process trace visualizations</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h4>Login</h4>
+            </div>
+            <div class="card-body">
+                <div class="helper-strip">
+                    <div class="title">Quick Tip</div>
+                    Use the same role you selected during registration to access the right dashboard flow.
+                </div>
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Login</button>
+                    <a href="/register" class="btn btn-secondary">Register</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

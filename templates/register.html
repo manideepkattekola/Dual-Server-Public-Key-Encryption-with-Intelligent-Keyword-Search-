@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero-panel mb-3">
+    <h2 class="h4 mb-2">Create Your Account</h2>
+    <p>Register as a Data Owner or Data User and test end-to-end encrypted cloud storage with private keyword search.</p>
+</section>
+
+<div class="row g-3 justify-content-center">
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Role Selection Guide</h5>
+                <ul class="suggestion-list">
+                    <li><strong>Owner:</strong> upload file, encrypt, store keyword ciphertext</li>
+                    <li><strong>User:</strong> search by trapdoor and download matched file</li>
+                    <li>You can create both role accounts for full demo</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h4>Register</h4>
+            </div>
+            <div class="card-body">
+                <div class="helper-strip">
+                    <div class="title">Suggestion</div>
+                    Use simple usernames like owner1 and user1 to speed up demo execution.
+                </div>
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Full Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="mobile" class="form-label">Mobile</label>
+                        <input type="text" class="form-control" id="mobile" name="mobile" placeholder="e.g., +91 9876543210" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="role" class="form-label">Role</label>
+                        <select class="form-control" id="role" name="role" required>
+                            <option value="owner">Data Owner</option>
+                            <option value="user">Data User</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Register</button>
+                    <a href="/login" class="btn btn-secondary">Login</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
